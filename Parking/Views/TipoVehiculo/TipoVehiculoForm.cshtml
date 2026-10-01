@@ -1,0 +1,39 @@
+﻿@using Parking.ViewModels.TipoVehiculo;
+@{
+    ViewData["Title"] = $"{ViewBag.Accion} Tipo de Vehículo";
+}
+@model TipoVehiculoInsertViewModel;
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mt-4">
+            <h1 class="display-5">@ViewBag.Accion Tipo de Vehículo</h1>
+        </div>
+        <form asp-controller="TipoVehiculo" asp-action="CrearEditarTipoVehiculo" class="mt-4">
+            <input hidden asp-for="Id" />
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="tipo" placeholder=" " asp-for="Tipo" />
+                <label for="tipo">Tipo</label>
+                <span class="small text-danger" asp-validation-for="Tipo"></span>
+            </div>
+            @if (ViewBag.Accion == "Editar")
+            {
+                <div class="form-floating mt-4">
+                    <select class="form-select" id="estado" asp-for="Estado">
+                        <option value="A">Activo</option>
+                        <option value="I">Inactivo</option>
+                    </select>
+                    <label for="estado">Estado</label>
+                    <span class="small text-danger" asp-validation-for="Estado"></span>
+                </div>
+            }
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-secondary" asp-controller="TipoVehiculo" asp-action="Index">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

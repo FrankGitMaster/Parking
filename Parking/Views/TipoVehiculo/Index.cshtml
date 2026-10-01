@@ -1,0 +1,79 @@
+﻿@using Parking.ViewModels.TipoVehiculo
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Tipos de Vehículo";
+}
+@model IReadOnlyList<TipoVehiculoViewModel>;
+<div class="text-center mt-4">
+    <h1 class="display-5">@ViewData["Title"]</h1>
+    <a class="btn btn-primary mt-4" asp-controller="TipoVehiculo" asp-action="TipoVehiculoForm">Crear Tipo de Vehículo</a>
+</div>
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td class="text-center" colspan="4">No hay Tipos de Vehículo creados</td>
+            </tr>
+        }
+        @foreach (var tipoVehiculo in Model)
+        {
+            <tr>
+                <td>@tipoVehiculo.Id</td>
+                <td>@tipoVehiculo.Tipo</td>
+                <td>@tipoVehiculo.Estado</td>
+                <td>
+                    <div class="botones-accion btn-group" role="group">
+                        <a class="btn btn-warning" asp-controller="TipoVehiculo" asp-action="TipoVehiculoForm" asp-route-id="@tipoVehiculo.Id">Editar</a>
+                        <a class="btn btn-danger btn-eliminar" asp-controller="TipoVehiculo" asp-action="EliminarTipoVehiculo" asp-route-id="@tipoVehiculo.Id">Eliminar</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+
+            const botonesEliminar = document.querySelectorAll(".btn-eliminar");
+            botonesEliminar.forEach(boton => {
+                boton.addEventListener('click', function(e){
+                e.preventDefault();
+                const tipoVehiculo = this.closest("tr").querySelector("td:nth-child(2)").innerText;
+                swal.fire({
+                    text: `¿Está seguro de eliminar el Tipo de Vehículo ${tipoVehiculo}`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Sí, eliminar",
+                    confirmButtonColor: "#d33"
+                }).then((result) =>{
+                    if(result.isConfirmed){
+                        window.location.href = this.getAttribute("href");
+                    }
+                });
+                });
+            });
+
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: swalIcon,
+                    showCloseButton: true
+                });
+            }
+        });
+    </script>
+}

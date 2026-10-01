@@ -1,0 +1,33 @@
+﻿@using Parking.ViewModels.CuentaVM;
+@{
+    ViewData["Title"] = "Restaurar Contraseña";
+    Layout = "~/Views/Shared/_LayoutCuenta.cshtml";
+}
+@model RestaurarContrasenaViewModel;
+<div class="text-center mt-4">
+    <h1 class="display-5">@ViewData["Title"]</h1>
+</div>
+<form asp-action="RestaurarContrasena" class="mt-4">
+    <div class="form-floating">
+        <input asp-for="Usuario" type="text" class="form-control" placeholder=" " readonly />
+        <label asp-for="Usuario"></label>
+        <span asp-validation-for="Usuario" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <input asp-for="NuevaContrasena" type="password" class="form-control" placeholder=" " />
+        <label asp-for="NuevaContrasena"></label>
+        <span asp-validation-for="NuevaContrasena" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <input asp-for="ConfirmarContrasena" type="password" class="form-control" placeholder=" " />
+        <label asp-for="ConfirmarContrasena"></label>
+        <span asp-validation-for="ConfirmarContrasena" class="small text-danger"></span>
+    </div>
+    <div class="mt-4 text-center">
+        <button class="btn btn-primary" type="submit">Guardar</button>
+        <a asp-action="Login" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

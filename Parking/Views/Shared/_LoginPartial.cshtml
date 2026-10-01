@@ -1,0 +1,9 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Usuario> signInManager;
+
+@if (signInManager.IsSignedIn(User))
+{
+    <li class="nav-item ms-auto">
+        <a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Logout">Cerrar Sesión</a>
+    </li>
+}

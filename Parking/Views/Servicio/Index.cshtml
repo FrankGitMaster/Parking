@@ -1,0 +1,160 @@
+﻿@using System.Text.Json
+@using Parking.ViewModels.ServicioVM
+@{
+    ViewData["Title"] = "Servicios";
+}
+@model IReadOnlyList<ServicioViewModel>
+<div class="text-center mt-4">
+    <h1 class="display-5">@ViewData["Title"]</h1>
+    <a class="btn btn-primary mt-4" asp-controller="Servicio" asp-action="ServicioForm">Crear Servicio</a>
+    <div class="botones-filtro mt-4">
+        <a class="btn btn-outline-success" asp-controller="Servicio" asp-action="Index">Activos</a>
+        <a class="btn btn-outline-dark" asp-controller="Servicio" asp-action="FiltrarFinalizados">Finalizados</a>
+        <a class="btn btn-outline-primary" asp-controller="Servicio" asp-action="ObtenerTodo">Todos</a>
+    </div>
+</div>
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Id</td>
+            <th>Placa</td>
+            <th>Color</td>
+            <th>Tipo Vehículo</td>
+            <th>Observación</td>
+            <th>Espacio</td>
+            <th>Empleado</td>
+            <th>Fecha Hora Ingreso</td>
+            <th>Fecha Hora Salida</td>
+            <th>Total Minutos</td>
+            <th>Valor Total</td>
+            <th>Tarifa Plena</td>
+            <th></td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td class="text-center" colspan="13">No hay servicios activos</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var servicio in Model)
+            {
+                <tr data-estado="@servicio.Estado">
+                    <td>@servicio.Id</td>
+                    <td>@servicio.Placa</td>
+                    <td>@servicio.Color</td>
+                    <td>@servicio.TipoVehiculo</td>
+                    <td>@servicio.Observacion</td>
+                    <td>@servicio.Espacio</td>
+                    <td>@servicio.UsuarioCreacion</td>
+                    <td>@servicio.FechaHoraIngreso</td>
+                    <td>@servicio.FechaHoraSalida</td>
+                    <td>@servicio.TotalMinutos</td>
+                    <td>@servicio.ValorTotal</td>
+                    <td>
+                        <div class="tarifa-plena-checkbox">
+                            <input type="checkbox" disabled @(servicio.TarifaPlena ? "checked" : "") />
+                        </div>
+                    </td>
+                    @if (servicio.Estado == "Finalizado")
+                    {
+                        <td>
+                            <div>
+                                <span class="text-danger text-uppercase fw-bold m-1 span-finalizado">finalizado</span>
+                            </div>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <div class="botones-accion btn-group" role="group">
+                                <a class="btn btn-dark btn-finalizar" asp-controller="Servicio" asp-action="FinalizarServicio" asp-route-id="@servicio.Id">Finalizar</a>
+                                <a class="btn btn-warning" asp-controller="Servicio" asp-action="ServicioForm" asp-route-id="@servicio.Id">Editar</a>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <a class="btn btn-danger btn-eliminar" asp-controller="Servicio" asp-action="EliminarServicio" asp-route-id="@servicio.Id">Eliminar</a>
+                                }
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+
+            const botonesEliminar = document.querySelectorAll(".btn-eliminar");
+            botonesEliminar.forEach(btn => {
+                btn.addEventListener("click", function(e){
+                    e.preventDefault();
+                    const servicio = this.closest("tr").querySelector("td:nth-child(1)").innerText;
+                    swal.fire({
+                        text: `¿Está seguro de eliminar el Servicio ${servicio}?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        cancelButtonText: "Cancelar",
+                        cancelButtonColor: "#6c757d",
+                        confirmButtonText: "Sí, eliminar",
+                        confirmButtonColor: "#d33"
+                    }).then((result) =>{
+                        if(result.isConfirmed){
+                            window.location.href = this.getAttribute("href");
+                        }
+                    });
+                });
+            });
+
+            const botonesFinalizar = document.querySelectorAll(".btn-finalizar");
+            botonesFinalizar.forEach(btn => {
+                btn.addEventListener("click", function(e){
+                    e.preventDefault();
+                    const idServicio = this.closest("tr").querySelector("td:nth-child(1)").innerText;
+                    swal.fire({
+                        text: `¿Está seguro de finalizar el servicio ${idServicio}?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        cancelButtonText: "Cancelar",
+                        cancelButtonColor: "#6c757d",
+                        confirmButtonText: "Sí, finalizar",
+                        confirmButtonColor: "#000"
+                    }).then((result) => {
+                        if(result.isConfirmed){
+                            window.location.href = this.getAttribute("href");
+                        }
+                    });
+                });
+            });
+
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: swalIcon
+                }).then(() =>{
+                    const swalTextMessage = @Html.Raw(JsonSerializer.Serialize(TempData["SwalTextMessage"]));
+                    const swalIconMessage = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIconMessage"]));
+                    if(swalTextMessage && swalIconMessage){
+                        swal.fire({
+                            text: swalTextMessage,
+                            icon: swalIconMessage
+                        });
+                    }
+                });
+            }
+
+            const filasServiciosFinalizados = document.querySelectorAll('tr[data-estado="Finalizado"]');
+            filasServiciosFinalizados.forEach(tr => {
+                tr.style.backgroundColor = "#e1e1e1";
+                tr.style.opacity = "0.8";
+            });
+
+        });
+    </script>
+}

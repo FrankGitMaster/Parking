@@ -1,0 +1,83 @@
+﻿@using Parking.ViewModels.TipoIdentificacionVM
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Tipo de identificación";
+}
+@model IReadOnlyList<TipoIdentificacionViewModel>;
+<div class="text-center mt-4">
+    <h1 class="display-5">Tipos de identificación</h1>
+    <a class="btn btn-primary mt-4" asp-controller="TipoIdentificacion" asp-action="TipoIdentificacionForm">Crear tipo de identificación</a>
+</div>
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Tipo</th>
+            <th>Sigla</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td class="text-center" colspan="5">No hay tipos de identificación creados</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var tipoIdentificacion in Model)
+            {
+                <tr>
+                    <td>@tipoIdentificacion.Id</td>
+                    <td>@tipoIdentificacion.Tipo</td>
+                    <td>@tipoIdentificacion.Sigla</td>
+                    <td>@tipoIdentificacion.Estado</td>
+                    <td>
+                        <div class="botones-accion btn-group" role="group">
+                            <a class="btn btn-warning" asp-controller="TipoIdentificacion" asp-action="TipoIdentificacionForm" asp-route-id="@tipoIdentificacion.Id">Editar</a>
+                            <a class="btn btn-danger btn-eliminar" asp-controller="TipoIdentificacion" asp-action="EliminarTipoIdentificacion" asp-route-id="@tipoIdentificacion.Id">Eliminar</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const botonesEliminar = document.querySelectorAll(".btn-eliminar");
+                botonesEliminar.forEach(boton => {
+                boton.addEventListener('click', function(e){
+                e.preventDefault();
+                const tipoIdentificacion = this.closest('tr').querySelector('td:nth-child(2)').innerText;
+                swal.fire({
+                    text: `¿Esta seguro de eliminar el Tipo de Identificacion ${tipoIdentificacion}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Sí, eliminar",
+                    confirmButtonColor: "#d33"
+                }).then((result) => {
+                    if(result.isConfirmed){
+                        window.location.href = this.getAttribute('href');
+                    }
+                });
+                });
+            });
+
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: swalIcon,
+                    showCloseButton: true
+                });
+            }
+        });
+    </script>
+}

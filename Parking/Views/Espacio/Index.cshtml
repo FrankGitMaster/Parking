@@ -1,0 +1,191 @@
+﻿@using Parking.ViewModels.EspacioVM;
+@{
+    ViewData["Title"] = "Espacios";
+}
+@model IReadOnlyList<EspacioViewModel>;
+<div class="text-center mt-4">
+    <h1 class="display-5">Espacios</h1>
+    <a class="btn btn-primary mt-4" asp-controller="Espacio" asp-action="EspacioForm">Crear Espacio</a>
+    <div class="select-filtro mt-4">
+        <label for="filtro-tipo-vehiculo">Filtrar por</label>
+        <select class="form-select" id="filtro-tipo-vehiculo" asp-items="@(new SelectList(ViewBag.TiposVehiculo, "Id", "Tipo"))">
+            <option value="0">Todos</option>
+        </select>
+    </div>
+</div>
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Tipo Vehículo</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && !Model.Any())
+        {
+            <tr>
+                <td class="text-center" colspan="5">No hay espacio creados</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var espacio in Model)
+            {
+                <tr data-estado="@espacio.Estado">
+                    <td>@espacio.Numero</td>
+                    <td>@espacio.TipoVehiculo</td>
+                    <td>@espacio.Estado</td>
+                    <td>
+                        <div class="botones-accion btn-group" role="group">
+                            <a class="btn btn-warning" asp-controller="Espacio" asp-action="EspacioForm" asp-route-id="@espacio.Id">Editar</a>
+                            <a class="btn btn-danger btn-eliminar" asp-controller="Espacio" asp-action="EliminarEspacio" asp-route-id="@espacio.Id">Eliminar</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const selectFiltroTipoVehiculo = document.getElementById("filtro-tipo-vehiculo");
+            selectFiltroTipoVehiculo.addEventListener("change", function(){
+                const idTipoVehiculo = this.value;
+                const tabla = document.querySelector("tbody");
+                fetch(`/Espacio/FiltrarEspaciosPorTipoVehiculo?id=${idTipoVehiculo}`)
+                .then(response => {
+                    return response.json();
+                })
+                .then(espacios => {
+                    tabla.innerHTML = "";
+                    if(espacios.length === 0){
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `<td colspan="4">No hay Espacios creados</td>`;
+                        tabla.appendChild(tr);
+                    }else{
+                        espacios.forEach(espacio => {
+                            const tr = document.createElement("tr");
+                            tr.innerHTML = `
+                                <td>${espacio.numero}</td>
+                                <td>${espacio.tipoVehiculo}</td>
+                                <td>${espacio.estado}</td>
+                                <td>
+                                    <div class="botones-accion btn-group" role="group">
+                                        <a class="btn btn-warning" href="/Espacio/EspacioForm/${espacio.id}">Editar</a>
+                                        <a class="btn btn-danger btn-eliminar" href="/Espacio/EliminarEspacio/${espacio.id}">Eliminar</a>
+                                    </div>
+                                </td>
+                            `;
+                            tabla.appendChild(tr);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.log("Error al cargar close espacios del tipo de vehículo", error);
+                });
+            });
+
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            botonesEliminar.forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const espacioNumero = this.closest('tr').querySelector('td:nth-child(1)').innerText;
+                    swal.fire({
+                        html: `¿Está seguro de eliminar el Espacio ${espacioNumero}?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancelar',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar',
+                        confirmButtonColor: '#d33',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            swal.fire({
+                                text: "¿Desea descargar un archivo Excel con los servicios a eliminar?",
+                                icon: "question",
+                                showCancelButton: true,
+                                cancelButtonText: "Cancelar",
+                                cancelButtonColor: "#6c757d",
+                                confirmButtonText: "Sí, descargar",
+                                confirmButtonColor: "#1D6F42",
+                                showDenyButton: true,
+                                denyButtonText: "No"
+                            }).then((descargar) => {
+                                if(descargar.isConfirmed){
+                                    fetch(`/Espacio/GenerarReporteExcelServiciosEspacio?espacioNumero=${espacioNumero}`)
+                                    .then(response => {
+                                        return response.blob();
+                                    })
+                                    .then(blob => {
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement("a");
+                                        a.href = url;
+                                        a.download = `Servicios_${espacioNumero}.xlsx`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+                                        window.location.href = this.getAttribute("href");
+                                    });
+                                }else if(descargar.isDenied){
+                                    window.location.href = this.getAttribute("href");
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            const SwalText = '@(TempData["SwalText"] ?? "")';
+            const SwalIcon = '@(TempData["SwalIcon"] ?? "")';
+            const SwalTextExcel = '@TempData["SwalTextExcel"]';
+
+            if(SwalTextExcel && SwalText && SwalIcon){
+                swal.fire({
+                    text: SwalTextExcel,
+                    icon: SwalIcon
+                })
+                .then(() => {
+                    Swal.fire({
+                        text: SwalText,
+                        icon: SwalIcon
+                    });
+                });
+            }
+            else if(SwalText && SwalIcon) {
+                Swal.fire({
+                    text: SwalText,
+                    icon: SwalIcon
+                });
+            }
+
+            const espaciosOcupados = document.querySelectorAll('tr[data-estado="Ocupado"]');
+            espaciosOcupados.forEach(espacio => {
+                const btnEditar = espacio.querySelector(".btn-warning");
+                const btnEliminar = espacio.querySelector(".btn-danger");
+                btnEditar.addEventListener("click", function(e){
+                    e.preventDefault();
+                    swal.fire({
+                        text: "No se puede editar un espacio Ocupado",
+                        icon: "warning"
+                    });
+                });
+                btnEliminar.addEventListener("click", function(e){
+                    e.preventDefault();
+                    swal.fire({
+                        text: "No se puede eliminar un espacio Ocupado",
+                        icon: "warning"
+                    });
+                });
+                btnEditar.style.opacity = "0.5";
+                btnEditar.style.cursor = "not-allowed";
+                btnEliminar.style.opacity = "0.5";
+                btnEliminar.style.cursor = "not-allowed";
+            });
+        });
+    </script>
+}

@@ -1,0 +1,64 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+td, th {
+    text-align: center;
+    vertical-align: middle;
+}
+a{
+    text-decoration: none;
+}
+.acciones-login{
+    display: flex;
+    justify-content: space-between;
+}
+.acciones-login .form.form-check{
+    display: inline-block;
+}
+.tarifa-plena-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+.botones-accion {
+    float: inline-end;
+}
+
+.btn:active:focus, .btn:focus {
+    box-shadow: none;
+}
+
+.select-filtro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .select-filtro select {
+        width: inherit;
+        margin: 0 0.5rem;
+    }
+
+    .select-filtro label {
+        font-weight: bold;
+    }

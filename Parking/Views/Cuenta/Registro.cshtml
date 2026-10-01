@@ -1,0 +1,53 @@
+﻿@using Parking.ViewModels.CuentaVM
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Registrarse";
+    Layout = "~/Views/Shared/_LayoutCuenta.cshtml";
+}
+@model RegistroViewModel;
+<h1 class="display-5 mt-4 text-center">Registro</h1>
+<form asp-action="Registro" class="mt-4">
+    <div class="form-floating">
+        <input asp-for="Nombre" type="text" class="form-control" placeholder=" " />
+        <label asp-for="Nombre"></label>
+        <span asp-validation-for="Nombre" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <input asp-for="Correo" type="email" class="form-control" placeholder=" " />
+        <label asp-for="Correo"></label>
+        <span asp-validation-for="Correo" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <input asp-for="Contrasena" type="password" class="form-control" placeholder=" " />
+        <label asp-for="Contrasena"></label>
+        <span asp-validation-for="Contrasena" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <input asp-for="ConfirmarContrasena" type="password" class="form-control" placeholder=" " />
+        <label asp-for="ConfirmarContrasena"></label>
+        <span asp-validation-for="ConfirmarContrasena" class="small text-danger"></span>
+    </div>
+    <div class="form-floating mt-4">
+        <select asp-for="Rol" class="form-select" asp-items="@(new SelectList(ViewBag.Roles, "Id", "Name"))"></select>
+        <label asp-for="Rol"></label>
+    </div>
+    <div class="mt-4 text-center">
+        <button class="btn btn-primary" type="submit">Registrarse</button>
+        <a asp-controller="Usuario" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: swalIcon
+                });
+            }
+        });
+    </script>
+}

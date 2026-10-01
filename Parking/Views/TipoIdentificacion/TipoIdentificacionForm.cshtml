@@ -1,0 +1,42 @@
+﻿@using Parking.ViewModels.TipoIdentificacionVM;
+@{
+    ViewData["Title"] = $"{ViewBag.Accion} Tipo de Identificación";
+}
+@model TipoIdentificacionInsertViewModel;
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mt-4">
+            <h1 class="display-5">@ViewBag.Accion Tipo de Identificación</h1>
+        </div>
+        <form asp-controller="TipoIdentificacion" asp-action="CrearEditarTipoIdentificacion" class="mt-4">
+            <input hidden asp-for="Id" />
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="tipo" placeholder=" " asp-for="Tipo" />
+                <label for="tipo">Tipo</label>
+                <span class="small text-danger" asp-validation-for="Tipo"></span>
+            </div>
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="sigla" placeholder=" " asp-for="Sigla" />
+                <label for="sigla">Sigla</label>
+                <span class="small text-danger" asp-validation-for="Sigla"></span>
+            </div>
+            @if (ViewBag.Accion == "Editar")
+            {
+                <div class="form-floating mt-4">
+                    <select class="form-select" id="estado" asp-for="Estado">
+                        <option value="A">Activo</option>
+                        <option value="I">Inactivo</option>
+                    </select>
+                    <label for="estado">Estado</label>
+                </div>
+            }
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-secondary" asp-controller="TipoIdentificacion" asp-action="Index">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+}

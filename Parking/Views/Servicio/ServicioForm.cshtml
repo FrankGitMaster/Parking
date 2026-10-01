@@ -1,0 +1,117 @@
+﻿@using Parking.ViewModels.ServicioVM;
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Servicios";
+}
+@model ServicioInsertViewModel;
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="mt-4 text-center">
+            <h1 class="display-5">@ViewBag.Accion Servicio</h1>
+        </div>
+        <form asp-controller="Servicio" asp-action="CrearEditarServicio" class="mt-4">
+            <input hidden asp-for="Id" />
+            <div class="form-floating">
+                <input type="text" class="form-control input-servicio" id="placa" placeholder=" " asp-for="Placa" />
+                <label for="placa">Placa</label>
+                <span class="small text-danger" asp-validation-for="Placa"></span>
+            </div>
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="color" placeholder=" " asp-for="Color" />
+                <label for="color">Color</label>
+                <span class="small text-danger" asp-validation-for="Color"></span>
+            </div>
+            <div class="form-floating mt-4">
+                <select class="form-select" id="tipo-vehiculo" asp-for="IdTipoVehiculo" asp-items="@(new SelectList(ViewBag.TiposVehiculo, "Id", "Tipo"))"></select>
+                <label for="tipo-vehiculo">Tipo de Vehículo</label>
+            </div>
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="observacion" placeholder=" " asp-for="Observacion" />
+                <label for="observacion">Observacion</label>
+                <span class="small text-danger" asp-validation-for="Observacion"></span>
+            </div>
+            <div class="form-floating mt-4">
+                <select class="form-select" id="espacio" asp-for="Espacio" asp-items="@(new SelectList(ViewBag.Espacios, "Numero", "Numero"))"></select>
+                <label for="espacio">Espacio</label>
+            </div>
+            @if (ViewBag.Accion == "Crear")
+            {
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input" id="tarifa-plena" asp-for="TarifaPlena" />
+                    <label class="form-check-label" for="tarifa-plena">Tarifa Plena</label>
+                </div>
+            }
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-secondary" asp-controller="Servicio" asp-action="Index">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            const idServicio = @Model.Id;
+            const selectTipoVehiculo = document.getElementById("tipo-vehiculo");
+            const selectEspacio = document.getElementById("espacio");
+            const btnGuardar = document.querySelector(".btn-primary");
+            const inputs = document.querySelectorAll("input");
+
+            cargarEspacios();
+
+            selectTipoVehiculo.addEventListener("change", cargarEspacios);
+
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: swalIcon,
+                    showCancelButton: true
+                });
+            }
+
+            async function cargarEspacios(){
+                const idTipoVehiculo = selectTipoVehiculo.value;
+                fetch(`/Servicio/ObtenerEspaciosJson?id=${idServicio}&idTipoVehiculo=${idTipoVehiculo}`)
+                .then(response => {
+                    return response.json();
+                })
+                .then(espacios => {
+                    selectEspacio.innerHTML = "";
+                    if(espacios.length > 0){
+                        espacios.forEach(espacio => {
+                            const option = document.createElement("option");
+                            option.value = espacio.numero;
+                            option.textContent = espacio.numero;
+                            selectEspacio.appendChild(option);
+                        });
+                        selectEspacio.disabled = false;
+                        btnGuardar.disabled = false;
+                        inputs.forEach(input => {
+                            input.disabled = false;
+                        });
+                    }else{
+                        swal.fire({
+                            text: "No hay Espacios disponibles para este Tipo de Vehículo",
+                            icon: "info"
+                        });
+                        const option = document.createElement("option");
+                        option.textContent = "No hay Espacios disponibles";
+                        selectEspacio.appendChild(option);
+                        selectEspacio.disabled = true;
+                        btnGuardar.disabled = true;
+                        inputs.forEach(input => {
+                            input.disabled = true;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.log("Error", error);
+                });
+            }
+
+        });
+    </script>
+}

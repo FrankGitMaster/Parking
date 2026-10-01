@@ -1,0 +1,52 @@
+﻿@using Parking.ViewModels.EspacioVM;
+@using System.Text.Json
+@{
+    ViewData["Title"] = $"{ViewBag.Accion} Espacios";
+}
+@model EspacioInsertViewModel;
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mt-4">
+            <h1 class="display-5">@ViewBag.Accion Espacios</h1>
+        </div>
+        <form asp-controller="Espacio" asp-action="CrearEditarEspacio" class="mt-4">
+            <input hidden asp-for="Id" />
+            <div class="form-floating mt-4">
+                <input type="text" class="form-control" id="numero" placeholder=" " asp-for="Numero" />
+                <label for="numero">Número</label>
+                <span class="small text-danger" asp-validation-for="Numero"></span>
+            </div>
+            <div class="form-floating mt-4">
+                <select class="form-select" id="tipo-vehiculo" asp-for="IdTipoVehiculo" asp-items="@(new SelectList(ViewBag.TiposVehiculo, "Id", "Tipo"))"></select>
+                <label for="tipo-vehiculo">Tipo de Vehículo</label>
+                <span class="small text-danger" asp-validation-for="IdTipoVehiculo"></span>
+            </div>
+            @if (ViewBag.Accion == "Editar")
+            {
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input" id="estado-inactivo" asp-for="EstadoInactivo" />
+                    <label class="form-check-label" for="estado-inactivo">Inactivo</label>
+                </div>
+            }
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-secondary" asp-controller="Espacio" asp-action="Index">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            const swalText = @Html.Raw(JsonSerializer.Serialize(TempData["SwalText"]));
+            const swalIcon = @Html.Raw(JsonSerializer.Serialize(TempData["SwalIcon"]));
+            if(swalText && swalIcon){
+                swal.fire({
+                    text: swalText,
+                    icon: SwalIcon
+                });
+            }
+        });
+    </script>
+}
